@@ -16,4 +16,4 @@ Here is an outline of some of Slice's features although this isnt all of them
 *And much more...
 
 ## Screenshot
-![Screenshot] (./features.gif?raw=true)
+![Screenshot](./screenshot.gif?raw=true "Screenshot")
