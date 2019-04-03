@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Login - Slice</title>
+	<link rel="shortcut icon" type="image/x-icon" href="lib/favicon.png">
+	<link rel="manifest" href="manifest.json" />
+	<style>
+		:root {
+		  --font: Source Sans Pro;
+		  --line-height: 1.2em;
+		  --editorfont: Inconsolata;
+		  --usercolor: #FFCE54;
+		  --show: #fff;
+		  --blend: #000;
+		  --transparent: url(lib\/darktransparent\.jpeg);
+		  --highlight: rgba(255,255,255,0.05);
+		  --background: #1F2430;
+		  --activetext: #D9D7CE;
+		  --accent: #F29E74;
+		  --text: #707A8C;
+		}
+		body {
+			height: 100vh;
+			margin: 0;
+			padding: 0;
+			font-family: var(--font), -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+			background: var(--background);
+			color: var(--text);
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			-o-user-select: none;
+			user-select: none;
+			overflow: hidden;
+		}
+		#login {
+			max-width: 500px;
+			width: 50vw;
+			min-width: 400px;
+			position: absolute;
+			left: 50%;
+			top: 45%;
+			padding: 20px;
+			box-sizing: border-box;
+			background: var(--background);
+			transform: translate(-50%, -50%);
+			transition: left 50ms;
+		}
+		#login svg {
+			width: 40%;
+			margin-bottom: 20px;
+		}
+		.loginField {
+			margin: 15px 0;
+		}
+		.loginField label {
+			display: block;
+			margin-bottom: 5px;
+			font-size: .9em;
+			color: var(--show);
+		}
+		.loginField input {
+			width: 100%;
+			padding: 13px 10px;
+			box-sizing: border-box;
+			background: transparent;
+			font-family: inherit;
+			font-size: .8em;
+			color: var(--activetext);
+			border: none;
+			border-bottom: 1px solid var(--accent);
+			outline: none;
+			display: block;
+			transition: background .3s, border-radius .3s;
+		}
+		#loginBtn {
+			position: relative;
+			margin: 10px 0 0 0;
+			padding: 14px 50px;
+			box-sizing: border-box;
+			display: inline-block;
+			cursor: pointer;
+			border-radius: 4px;
+		}
+		#loginBtn button {
+			position: relative;
+			padding: 0;
+			background: transparent;
+			color: var(--activetext);
+			font-weight: 300;
+			font-size: 1.1em;
+			cursor: pointer;
+			border: transparent;
+			outline: none;
+			transition: color .3s;
+		}
+		#loginBtn:hover button, #loginBtn button:active, #loginBtn button:focus-within, #loginBtn button:focus {
+			color: var(--show);
+		}
+		#loginBtn button:before {
+			content: "";
+			height: 100%;
+			width: 0;
+			position: absolute;
+			top: 0;
+			left: 50%;
+			transform: translate(-50%);
+			border-bottom: 1px solid var(--accent);
+			transition: width .3s;
+		}
+		#loginBtn:hover button:before, #loginBtn button:active, #loginBtn button:focus-within:before, #loginBtn button:focus:before {
+			width: 100%;
+		}
+		.err {
+			color: #E11900;
+			font-size: .7em;
+			text-align: center;
+		}
+		@media screen and (max-width: 450px) {
+			#login {
+				min-width: 100vw;
+				width: 100vw;
+				max-width: 100vw;
+				padding: 5%;
+			}
+			#login svg {
+				width: 60%;
+			}
+			#loginBtn {
+				width: 100%;
+				padding: 14px 0;
+			}
+		}
+		@media screen and (max-width: 200px) {
+			#login svg {
+				width: 80%;
+			}
+		}
+		@media screen and (max-height: 500px) {
+			body {
+				overflow: auto;
+			}
+			#login {
+				top: 0;
+				transform: translateX(-50%);
+			}
+		}
+	</style>
+</head>
+<body>
+	<div id="login">
+		<center>
+		<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 64 64"><path fill="var(--highlight)" d="M64 31.98C64 49.65 49.66 63.98 32 63.98C14.34 63.98 0 49.65 0 31.98C0 14.32 14.34 -0.02 32 -0.02C49.66 -0.02 64 14.32 64 31.98Z"/><path fill="var(--accent)" d="M47.19 14.74C36.79 20.42 26.76 31.9 26.26 32.3C25.77 32.71 28.87 30.58 28.87 30.83C25.63 33.72 23.09 37.85 21.86 39.97C20.16 42.03 20.38 47.69 20.63 46.83C20.71 46.55 20.9 45.03 20.97 45.02C21.04 45.02 21.17 45.86 21.17 45.85C22.29 49.59 25.12 49.31 25.13 49.53C25.14 49.64 24.21 50.62 23.01 50.83C22.53 51 20.62 51.04 19.34 50.99C18.7 50.9 17.95 50.8 17.14 50.41C16.32 50.02 16.11 49.77 15.66 49.25C15.21 48.72 14.37 47.2 14.45 47.15C14.52 47.11 15.61 48.45 15.35 47.61C14.8 46.23 14.49 45.13 14.73 43.51C16.52 31.64 26.92 23.88 26.36 24.52C25.98 24.95 24.48 27.05 21.86 30.83C23.27 29.15 26.26 26.35 30.82 22.43C37.67 16.53 49.35 12.93 49.42 12.99C49.49 13.05 50.28 12.93 47.19 14.74Z"/></svg>		</center>
+		<div id="err" class="err"></div>
+		<div class="loginField">
+			<label for="username">Username</label>
+			<input id="username" type="email" placeholder="Username / Email" spellcheck="false" onkeydown="if(event.keyCode == 13){login();}" />
+		</div>
+		<div class="loginField">
+			<label for="password">Password</label>
+			<input id="password" type="password" placeholder="Password" onkeydown="if(event.keyCode == 13){login();}" />
+		</div>
+		<center>
+			<div id="loginBtn" onclick="login();">
+				<button>Login</button>
+			</div>
+		</center>
+	</div>
+	<script>
+		window.addEventListener('load', function() {
+			document.getElementById('username').focus();
+		});
+		function login() {
+		  var username = document.getElementById('username').value;
+		  var password = document.getElementById('password').value;
+		  request('login', {username,password}, function(data) {
+		    if(data === true) {
+		    	window.location = 'index.html';
+		    }
+		    else {
+		    	if(data === 'invalid') {
+		    		document.getElementById('err').innerHTML = 'This user is already logged in';
+		    	}
+		    	else {
+		    		document.getElementById('err').innerHTML = 'Incorrect username or password';
+		    	}
+		      document.getElementById('login').style.left = "calc(50% - 10px)";
+		      setTimeout(function() {document.getElementById('login').style.left = "50%";}, 50);
+		      setTimeout(function() {document.getElementById('login').style.left = "calc(50% + 10px)";}, 100);
+		      setTimeout(function() {document.getElementById('login').style.left = "50%";}, 150);
+		      setTimeout(function() {document.getElementById('login').style.left = "calc(50% - 10px)";}, 200);
+		      setTimeout(function() {document.getElementById('login').style.left = "50%";}, 250);
+		      setTimeout(function() {document.getElementById('login').style.left = "calc(50% + 10px)";}, 250);
+		      setTimeout(function() {document.getElementById('login').style.left = "50%";}, 300);
+		    }
+		  });
+		}
+		function request(cmd, data, callback, loader) {
+		  var xhr = new XMLHttpRequest();
+		  if(loader) {document.getElementById(loader).style.opacity = '1';document.getElementById(loader).style.zIndex = '2';}
+		  xhr.open('POST', cmd, true);
+		  xhr.onreadystatechange = function() {
+		    if(xhr.readyState == 4 && xhr.status == 200) {
+		    	var res = xhr.responseText;
+		    	if(JSON.valid(res)) {res = JSON.parse(res);}
+		      if(callback !== null) {callback(res);}
+		      if(loader) {document.getElementById(loader).style.opacity = '0';setTimeout(function() {document.getElementById(loader).style.zIndex = '-2';}, 500);}
+		    }
+		  };
+		  if(data instanceof FormData) {
+		    xhr.send(data);
+		  }
+		  else if(data) {
+		    var d = "";
+		    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+		    Object.keys(data).forEach(function(key) {
+		      if(typeof data[key] == 'object') {data[key] = JSON.stringify(data[key]);}
+		      d += key + '=' + encodeURIComponent(data[key]) + '&';
+		    });
+		    d = d.substr(0,d.length-1);
+		    xhr.send(d);
+		  }
+		  else {
+		    xhr.send();
+		  }
+		}
+		JSON.valid = function(text) {
+			try {JSON.parse(text);return true;}
+			catch {return false;}
+		}
+	</script>
+</body>
+</html>

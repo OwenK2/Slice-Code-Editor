@@ -1,0 +1,17 @@
+{
+  "short_name": "Slice",
+  "name": "Slice Editor",
+  "icons": [
+    {
+      "src": "lib/logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "index.html",
+  "background_color": "#1F2430",
+  "orientation": "landscape",
+  "display": "standalone",
+  "scope": "./",
+  "theme_color": "#1F2430"
+}

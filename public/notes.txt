@@ -1,0 +1,7 @@
+HERES WHAT YOU NEED TO DO
+- operational transformation
+
+BUGS / ERRORS
+- none its perfect
+
+-(node:86595) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 done listeners added. Use emitter.setMaxListeners() to increase limit

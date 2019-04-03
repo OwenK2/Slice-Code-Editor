@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+	<meta charset=UTF-8>
+	<meta name="description" content="Slice is an online collaborative editor for all developers. It provides an online environment for development enhancing workflow and allowring for teamwork. Created using node.js Slice is fast, efficent, and easy to use." />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Slice</title>
+	<link rel="manifest" href="manifest.json">
+	<link rel="stylesheet" href="style.css" />
+	<link rel="shortcut icon" type="image/x-icon" href="lib/favicon.png">
+</head>
+<body oncontextmenu="event.preventDefault();return false;" onresize="resize();">
+	<input type="color" oninput="inputColor(this.value);" id="colorinput" class="hidden" />
+	<div id="dragMarker">
+		<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 60 60"><polygon points="49,12 49,0 6,0 6,55 9,55 9,3 40,3"/><path d="M39.414,5H11v55h43V19.586L39.414,5z M20,17h10c0.552,0,1,0.447,1,1s-0.448,1-1,1H20c-0.552,0-1-0.447-1-1S19.448,17,20,17   z M45,51H20c-0.552,0-1-0.447-1-1s0.448-1,1-1h25c0.552,0,1,0.447,1,1S45.552,51,45,51z M45,43H20c-0.552,0-1-0.447-1-1s0.448-1,1-1h25c0.552,0,1,0.447,1,1S45.552,43,45,43z M45,35H20c-0.552,0-1-0.447-1-1s0.448-1,1-1h25c0.552,0,1,0.447,1,1S45.552,35,45,35z M45,27H20c-0.552,0-1-0.447-1-1s0.448-1,1-1h25c0.552,0,1,0.447,1,1S45.552,27,45,27z M38,21V7l14,14H38z"/></svg>
+		<span>5 Files</span>
+	</div>
+	<div id="main" onmousedown="menu.close(true)">
+		<svg id="fullScreenArrow" onclick="fullScreenToggle()" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 492.004 492.004"><path d="M382.678,226.804L163.73,7.86C158.666,2.792,151.906,0,144.698,0s-13.968,2.792-19.032,7.86l-16.124,16.12c-10.492,10.504-10.492,27.576,0,38.064L293.398,245.9l-184.06,184.06c-5.064,5.068-7.86,11.824-7.86,19.028c0,7.212,2.796,13.968,7.86,19.04l16.124,16.116c5.068,5.068,11.824,7.86,19.032,7.86s13.968-2.792,19.032-7.86L382.678,265c5.076-5.084,7.864-11.872,7.848-19.088C390.542,238.668,387.754,231.884,382.678,226.804z"/></svg>
+		<div id="sidebar">
+			<input id="fileSearch" placeholder="Search Files" spellcheck="false" oninput="tree.find(this.value)" onkeydown="if(event.keyCode == 13){tree.findNext();}" onblur="if(this.classList.contains('open')){toggleFind();}" />
+			<div id="sidebarWrap">
+				<div id="sidebarHead">
+					<svg onclick="toggleFeatures();" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 64 64"><path fill="var(--highlight)" d="M64 31.98C64 49.65 49.66 63.98 32 63.98C14.34 63.98 0 49.65 0 31.98C0 14.32 14.34 -0.02 32 -0.02C49.66 -0.02 64 14.32 64 31.98Z"/><path fill="var(--accent)" d="M47.19 14.74C36.79 20.42 26.76 31.9 26.26 32.3C25.77 32.71 28.87 30.58 28.87 30.83C25.63 33.72 23.09 37.85 21.86 39.97C20.16 42.03 20.38 47.69 20.63 46.83C20.71 46.55 20.9 45.03 20.97 45.02C21.04 45.02 21.17 45.86 21.17 45.85C22.29 49.59 25.12 49.31 25.13 49.53C25.14 49.64 24.21 50.62 23.01 50.83C22.53 51 20.62 51.04 19.34 50.99C18.7 50.9 17.95 50.8 17.14 50.41C16.32 50.02 16.11 49.77 15.66 49.25C15.21 48.72 14.37 47.2 14.45 47.15C14.52 47.11 15.61 48.45 15.35 47.61C14.8 46.23 14.49 45.13 14.73 43.51C16.52 31.64 26.92 23.88 26.36 24.52C25.98 24.95 24.48 27.05 21.86 30.83C23.27 29.15 26.26 26.35 30.82 22.43C37.67 16.53 49.35 12.93 49.42 12.99C49.49 13.05 50.28 12.93 47.19 14.74Z"/></svg>
+					<div id="menuBtn"><span></span><span></span><span></span></div>
+					Slice
+				</div>
+				<center id="features">
+					<svg onclick="toggleFeatures()" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 47.971 47.971" ><path d="M28.228,23.986L47.092,5.122c1.172-1.171,1.172-3.071,0-4.242c-1.172-1.172-3.07-1.172-4.242,0L23.986,19.744L5.121,0.88c-1.172-1.172-3.07-1.172-4.242,0c-1.172,1.171-1.172,3.071,0,4.242l18.865,18.864L0.879,42.85c-1.172,1.171-1.172,3.071,0,4.242C1.465,47.677,2.233,47.97,3,47.97s1.535-0.293,2.121-0.879l18.865-18.864L42.85,47.091c0.586,0.586,1.354,0.879,2.121,0.879s1.535-0.293,2.121-0.879c1.172-1.171,1.172-3.071,0-4.242L28.228,23.986z"/></svg>
+					<center class="feature" onclick="toggleFeatures();togglePicker(true);"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 464.736 464.736"><path d="M446.598,18.143c-24.183-24.184-63.393-24.191-87.592-0.008l-16.717,16.717c-8.98-8.979-23.525-8.979-32.504,0c-8.981,8.972-8.981,23.533,0,32.505l5.416,5.419L134.613,253.377h-0.016l-62.685,62.691c-4.982,4.982-7.919,11.646-8.235,18.684l-0.15,3.344c0,0.016,0,0.03,0,0.046l-2.529,56.704c-0.104,2.633,0.883,5.185,2.739,7.048c1.751,1.759,4.145,2.738,6.63,2.738c0.135,0,0.269,0,0.42-0.008l30.064-1.331h0.016l18.318-0.815l8.318-0.366c9.203-0.412,17.944-4.259,24.469-10.776l240.898-240.891l4.506,4.505c4.49,4.488,10.372,6.733,16.252,6.733c5.881,0,11.764-2.245,16.253-6.733c8.98-8.973,8.98-23.534,0-32.505l16.716-16.718C470.782,81.544,470.782,42.334,446.598,18.143z M272.639,227.33l-84.6,15.96l137.998-138.004l34.332,34.316L272.639,227.33z"/><path d="M64.5,423.872c-35.617,0-64.5,9.145-64.5,20.435c0,11.284,28.883,20.428,64.5,20.428s64.486-9.143,64.486-20.428C128.986,433.016,100.117,423.872,64.5,423.872z"/></svg><p>Color Picker</p></center>
+					<center class="feature" onclick="toggleFeatures();toggleChat();"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 455 455"><path d="M315,157.5C315,70.515,244.485,0,157.5,0C70.515,0,0,70.515,0,157.5c0,32.92,10.106,63.476,27.376,88.749L6.689,308.311   l62.063-20.687C94.024,304.894,124.58,315,157.5,315C244.485,315,315,244.485,315,157.5z"/><path d="M455,297.5c0-70.533-46.37-130.224-110.284-150.284C344.9,150.63,345,154.058,345,157.5   c0,25.299-4.962,49.857-14.747,72.992c-9.445,22.331-22.961,42.38-40.171,59.59c-17.21,17.21-37.259,30.725-59.59,40.17   C207.357,340.039,182.799,345,157.5,345c-3.443,0-6.871-0.114-10.288-0.299C167.267,408.623,226.961,455,297.5,455   c32.92,0,63.476-10.106,88.749-27.376l62.063,20.687l-20.688-62.062C444.894,360.977,455,330.42,455,297.5z"/></svg><p>Chat</p></center>
+					<center class="feature" onclick="toggleFeatures();User.displayInfo(user.sqlid);"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 474.565 474.565"><path d="M255.204,102.3c-0.606-11.321-12.176-9.395-23.465-9.395C240.078,95.126,247.967,98.216,255.204,102.3z"/><path d="M134.524,73.928c-43.825,0-63.997,55.471-28.963,83.37c11.943-31.89,35.718-54.788,66.886-63.826   C163.921,81.685,150.146,73.928,134.524,73.928z"/><path d="M43.987,148.617c1.786,5.731,4.1,11.229,6.849,16.438L36.44,179.459c-3.866,3.866-3.866,10.141,0,14.015l25.375,25.383   c1.848,1.848,4.38,2.888,7.019,2.888c2.61,0,5.125-1.04,7.005-2.888l14.38-14.404c2.158,1.142,4.55,1.842,6.785,2.827   c0-0.164-0.016-0.334-0.016-0.498c0-11.771,1.352-22.875,3.759-33.302c-17.362-11.174-28.947-30.57-28.947-52.715   c0-34.592,28.139-62.739,62.723-62.739c23.418,0,43.637,13.037,54.43,32.084c11.523-1.429,22.347-1.429,35.376,1.033   c-1.676-5.07-3.648-10.032-6.118-14.683l14.396-14.411c1.878-1.856,2.918-4.38,2.918-7.004c0-2.625-1.04-5.148-2.918-7.004   l-25.361-25.367c-1.94-1.941-4.472-2.904-7.003-2.904c-2.532,0-5.063,0.963-6.989,2.904l-14.442,14.411   c-5.217-2.764-10.699-5.078-16.444-6.825V9.9c0-5.466-4.411-9.9-9.893-9.9h-35.888c-5.451,0-9.909,4.434-9.909,9.9v20.359   c-5.73,1.747-11.213,4.061-16.446,6.825L75.839,22.689c-1.942-1.941-4.473-2.904-7.005-2.904c-2.531,0-5.077,0.963-7.003,2.896   L36.44,48.048c-1.848,1.864-2.888,4.379-2.888,7.012c0,2.632,1.04,5.148,2.888,7.004l14.396,14.403   c-2.75,5.218-5.063,10.708-6.817,16.438H23.675c-5.482,0-9.909,4.441-9.909,9.915v35.889c0,5.458,4.427,9.908,9.909,9.908H43.987z"/><path d="M354.871,340.654c15.872-8.705,26.773-25.367,26.773-44.703c0-28.217-22.967-51.168-51.184-51.168   c-9.923,0-19.118,2.966-26.975,7.873c-4.705,18.728-12.113,36.642-21.803,52.202C309.152,310.022,334.357,322.531,354.871,340.654z   "/><path d="M460.782,276.588c0-5.909-4.799-10.693-10.685-10.693H428.14c-1.896-6.189-4.411-12.121-7.393-17.75l15.544-15.544   c2.02-2.004,3.137-4.721,3.137-7.555c0-2.835-1.118-5.553-3.137-7.563l-27.363-27.371c-2.08-2.09-4.829-3.138-7.561-3.138   c-2.734,0-5.467,1.048-7.547,3.138l-15.576,15.552c-5.623-2.982-11.539-5.481-17.751-7.369v-21.958   c0-5.901-4.768-10.685-10.669-10.685H311.11c-2.594,0-4.877,1.04-6.739,2.578c3.26,11.895,5.046,24.793,5.046,38.552   c0,8.735-0.682,17.604-1.956,26.423c7.205-2.656,14.876-4.324,22.999-4.324c36.99,0,67.086,30.089,67.086,67.07   c0,23.637-12.345,44.353-30.872,56.303c13.48,14.784,24.195,32.324,31.168,51.976c1.148,0.396,2.344,0.684,3.54,0.684   c2.733,0,5.467-1.04,7.563-3.13l27.379-27.371c2.004-2.004,3.106-4.721,3.106-7.555s-1.102-5.551-3.106-7.563l-15.576-15.552   c2.982-5.621,5.497-11.555,7.393-17.75h21.957c2.826,0,5.575-1.118,7.563-3.138c2.004-1.996,3.138-4.72,3.138-7.555   L460.782,276.588z"/><path d="M376.038,413.906c-16.602-48.848-60.471-82.445-111.113-87.018c-16.958,17.958-37.954,29.351-61.731,29.351   c-23.759,0-44.771-11.392-61.713-29.351c-50.672,4.573-94.543,38.17-111.145,87.026l-9.177,27.013   c-2.625,7.773-1.368,16.338,3.416,23.007c4.783,6.671,12.486,10.631,20.685,10.631h315.853c8.215,0,15.918-3.96,20.702-10.631   c4.767-6.669,6.041-15.234,3.4-23.007L376.038,413.906z"/><path d="M120.842,206.782c0,60.589,36.883,125.603,82.352,125.603c45.487,0,82.368-65.014,82.368-125.603   C285.563,81.188,120.842,80.939,120.842,206.782z"/></svg><p>Account</p></center>
+					<center class="feature" onclick="toggleFeatures();toggleFavorites(true);"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 55.867 55.867"><path d="M55.818,21.578c-0.118-0.362-0.431-0.626-0.808-0.681L36.92,18.268L28.83,1.876c-0.168-0.342-0.516-0.558-0.896-0.558s-0.729,0.216-0.896,0.558l-8.091,16.393l-18.09,2.629c-0.377,0.055-0.689,0.318-0.808,0.681c-0.117,0.361-0.02,0.759,0.253,1.024l13.091,12.76l-3.091,18.018c-0.064,0.375,0.09,0.754,0.397,0.978c0.309,0.226,0.718,0.255,1.053,0.076l16.182-8.506l16.18,8.506c0.146,0.077,0.307,0.115,0.466,0.115c0.207,0,0.413-0.064,0.588-0.191c0.308-0.224,0.462-0.603,0.397-0.978l-3.09-18.017l13.091-12.761C55.838,22.336,55.936,21.939,55.818,21.578z"/></svg><p>Favorites</p></center>									
+					<center class="feature" onclick="toggleFeatures();toggleFrame('flaticon');"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 119.29 102.04"><path d="M25.69 18.54L37.19 37.6L72.05 37.6L60.89 56.14L48.37 56.14L70.48 92.76L67.59 97.56L67.46 97.77L67.33 97.97L67.19 98.17L67.04 98.36L66.9 98.55L66.75 98.74L66.59 98.92L66.43 99.09L66.26 99.27L66.1 99.43L65.92 99.6L65.75 99.75L65.57 99.91L65.38 100.06L65.19 100.2L65 100.34L64.81 100.47L64.61 100.6L64.41 100.72L64.21 100.84L64 100.95L63.79 101.06L63.58 101.17L63.36 101.26L63.15 101.35L62.93 101.44L62.7 101.52L62.48 101.6L62.25 101.66L62.02 101.73L61.79 101.79L61.56 101.84L61.33 101.88L61.09 101.92L60.86 101.96L60.62 101.99L60.38 102.01L60.14 102.02L59.89 102.03L59.65 102.04L59.41 102.03L59.17 102.02L58.93 102.01L58.69 101.99L58.45 101.96L58.21 101.92L57.97 101.88L57.74 101.84L57.51 101.79L57.28 101.73L57.05 101.66L56.82 101.6L56.6 101.52L56.37 101.44L56.15 101.35L55.94 101.26L55.72 101.17L55.51 101.06L55.3 100.95L55.09 100.84L54.89 100.72L54.69 100.6L54.49 100.47L54.3 100.34L54.11 100.2L53.92 100.06L53.73 99.91L53.55 99.75L53.38 99.6L53.21 99.43L53.04 99.27L52.87 99.09L52.71 98.92L52.56 98.74L52.4 98.55L52.26 98.36L52.11 98.17L51.98 97.97L51.84 97.77L51.71 97.56L1.33 14.06L1.21 13.84L1.09 13.63L0.97 13.4L0.87 13.18L0.76 12.96L0.67 12.73L0.58 12.5L0.5 12.27L0.42 12.04L0.35 11.8L0.29 11.57L0.23 11.33L0.18 11.09L0.14 10.85L0.1 10.61L0.07 10.37L0.04 10.13L0.02 9.89L0.01 9.65L0 9.41L0 9.16L0.01 8.92L0.02 8.68L0.04 8.44L0.06 8.2L0.1 7.96L0.13 7.72L0.18 7.48L0.23 7.24L0.28 7L0.35 6.76L0.42 6.53L0.49 6.3L0.57 6.07L0.66 5.84L0.76 5.61L0.86 5.38L0.97 5.16L1.08 4.94L1.2 4.72L1.33 4.5L1.46 4.29L1.59 4.08L1.73 3.88L1.88 3.68L2.03 3.48L2.19 3.29L2.35 3.11L2.51 2.93L2.68 2.75L2.86 2.58L3.04 2.41L3.22 2.25L3.4 2.09L3.59 1.94L3.79 1.8L3.99 1.66L4.19 1.52L4.39 1.39L4.6 1.27L4.81 1.15L5.02 1.03L5.24 0.92L5.46 0.82L5.68 0.72L5.91 0.63L6.13 0.55L6.36 0.47L6.6 0.4L6.83 0.33L7.07 0.27L7.31 0.21L7.55 0.16L7.79 0.12L8.03 0.08L8.28 0.05L8.52 0.03L8.77 0.01L9.02 0L9.27 0L94.67 0L83.51 18.54L25.69 18.54ZM64.73 65.06L88.29 25.93L109.94 25.93L75.52 82.98L64.73 65.06ZM111.44 0.11L112.13 0.24L112.8 0.43L113.46 0.66L114.09 0.94L114.7 1.27L115.29 1.64L115.84 2.05L116.36 2.51L116.86 3L117.31 3.54L117.72 4.11L118.1 4.72L118.42 5.35L118.7 6L118.92 6.66L119.09 7.34L119.21 8.02L119.28 8.71L119.3 9.41L119.26 10.1L119.17 10.78L119.03 11.46L118.84 12.14L118.6 12.79L118.31 13.44L117.96 14.06L115.26 18.55L93.61 18.54L93.61 18.54L93.58 18.54L104.73 0L110.03 0L110.74 0.03L111.44 0.11Z"/></svg><p>Flaticon</p></center>
+					<center class="feature" onclick="toggleFeatures();toggleFrame('sketch');"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 208.623 208.623"><path d="M157.781,61.555l-4.061,0.738l3.272-2.515c0.447-0.344,11.23-8.421,35.003-8.421c1.151,0,2.327,0.034,3.505,0.073  c10.441-26.368,13.122-47.118,13.122-47.118s-41.926,5.413-82.32,30.845c0.908,26.147-7.923,38.029-8.362,38.601l-2.516,3.273  l0.739-4.062c2.772-15.238,2.412-25.625,1.471-32.01c-7.424,5.275-14.688,11.271-21.512,18.095c-0.294,0.294-0.581,0.593-0.872,0.89  c1.895,28.648-7.721,41.586-8.18,42.183l-2.516,3.273l0.738-4.061c2.779-15.28,2.41-25.681,1.463-32.06  c-28.021,33.288-39.392,73.094-43.428,91.705L0,204.311l25.864-8.62l26.084-26.084c19.028-4.128,60.222-15.923,93.946-45.347  c-2.64-0.377-5.936-0.653-9.945-0.653c-6.561,0-13.892,0.729-21.788,2.165l-4.061,0.739l3.271-2.516  c0.447-0.344,11.23-8.423,35.003-8.423c2.12,0,4.3,0.088,6.507,0.22c16.938-17.249,28.725-37.179,36.841-55.381  c-2.926-0.552-6.927-1.021-12.152-1.021C173.009,59.391,165.678,60.119,157.781,61.555z M56.562,161.755l-11.214,0.593l78.217-75.564L56.562,161.755z"/></svg><p>Sketch</p></svg></center>				
+					<center class="feature" onclick="toggleFeatures();prefTab('ptabSet');togglePref();"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 21.589 21.589"><path d="M18.622,8.371l-0.545-1.295c0,0,1.268-2.861,1.156-2.971l-1.679-1.639c-0.116-0.113-2.978,1.193-2.978,1.193l-1.32-0.533c0,0-1.166-2.9-1.326-2.9H9.561c-0.165,0-1.244,2.906-1.244,2.906L6.999,3.667c0,0-2.922-1.242-3.034-1.131L2.289,4.177C2.173,4.29,3.507,7.093,3.507,7.093L2.962,8.386c0,0-2.962,1.141-2.962,1.295v2.322c0,0.162,2.969,1.219,2.969,1.219l0.545,1.291c0,0-1.268,2.859-1.157,2.969l1.678,1.643c0.114,0.111,2.977-1.195,2.977-1.195l1.321,0.535c0,0,1.166,2.898,1.327,2.898h2.369c0.164,0,1.244-2.906,1.244-2.906l1.322-0.535c0,0,2.916,1.242,3.029,1.133l1.678-1.641c0.117-0.115-1.22-2.916-1.22-2.916l0.544-1.293c0,0,2.963-1.143,2.963-1.299v-2.32C21.59,9.425,18.622,8.371,18.622,8.371z M14.256,10.794c0,1.867-1.553,3.387-3.461,3.387c-1.906,0-3.461-1.52-3.461-3.387s1.555-3.385,3.461-3.385C12.704,7.41,14.256,8.927,14.256,10.794z"/></svg><p>Settings</p></center>
+					<center class="feature" onclick="toggleFeatures();prefTab('ptabHlp');togglePref();"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 111.577 111.577"><path d="M78.962,99.536l-1.559,6.373c-4.677,1.846-8.413,3.251-11.195,4.217c-2.785,0.969-6.021,1.451-9.708,1.451c-5.662,0-10.066-1.387-13.207-4.142c-3.141-2.766-4.712-6.271-4.712-10.523c0-1.646,0.114-3.339,0.351-5.064c0.239-1.727,0.619-3.672,1.139-5.846l5.845-20.688c0.52-1.981,0.962-3.858,1.316-5.633c0.359-1.764,0.532-3.387,0.532-4.848c0-2.642-0.547-4.49-1.636-5.529c-1.089-1.036-3.167-1.562-6.252-1.562c-1.511,0-3.064,0.242-4.647,0.71c-1.59,0.47-2.949,0.924-4.09,1.346l1.563-6.378c3.829-1.559,7.489-2.894,10.99-4.002c3.501-1.111,6.809-1.667,9.938-1.667c5.623,0,9.962,1.359,13.009,4.077c3.047,2.72,4.57,6.246,4.57,10.591c0,0.899-0.1,2.483-0.315,4.747c-0.21,2.269-0.601,4.348-1.171,6.239l-5.82,20.605c-0.477,1.655-0.906,3.547-1.279,5.676c-0.385,2.115-0.569,3.731-0.569,4.815c0,2.736,0.61,4.604,1.833,5.597c1.232,0.993,3.354,1.487,6.368,1.487c1.415,0,3.025-0.251,4.814-0.744C76.854,100.348,78.155,99.915,78.962,99.536z M80.438,13.03c0,3.59-1.353,6.656-4.072,9.177c-2.712,2.53-5.98,3.796-9.803,3.796c-3.835,0-7.111-1.266-9.854-3.796c-2.738-2.522-4.11-5.587-4.11-9.177c0-3.583,1.372-6.654,4.11-9.207C59.447,1.274,62.729,0,66.563,0c3.822,0,7.091,1.277,9.803,3.823C79.087,6.376,80.438,9.448,80.438,13.03z"/></svg><p>Help</p></center>					
+					<center class="feature" onclick="user.logout()"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path d="M510.371,226.513c-1.088-2.603-2.645-4.971-4.629-6.955l-63.979-63.979c-8.341-8.32-21.824-8.32-30.165,0c-8.341,8.341-8.341,21.845,0,30.165l27.584,27.584H320.013c-11.797,0-21.333,9.557-21.333,21.333s9.536,21.333,21.333,21.333h119.168l-27.584,27.584c-8.341,8.341-8.341,21.845,0,30.165c4.16,4.181,9.621,6.251,15.083,6.251s10.923-2.069,15.083-6.251l63.979-63.979c1.984-1.963,3.541-4.331,4.629-6.955C512.525,237.606,512.525,231.718,510.371,226.513z"/><path d="M362.68,298.667c-11.797,0-21.333,9.557-21.333,21.333v106.667h-85.333V85.333c0-9.408-6.187-17.728-15.211-20.437l-74.091-22.229h174.635v106.667c0,11.776,9.536,21.333,21.333,21.333s21.333-9.557,21.333-21.333v-128C384.013,9.557,374.477,0,362.68,0H21.347c-0.768,0-1.451,0.32-2.197,0.405c-1.003,0.107-1.92,0.277-2.88,0.512c-2.24,0.576-4.267,1.451-6.165,2.645c-0.469,0.299-1.045,0.32-1.493,0.661C8.44,4.352,8.376,4.587,8.205,4.715C5.88,6.549,3.939,8.789,2.531,11.456c-0.299,0.576-0.363,1.195-0.597,1.792c-0.683,1.621-1.429,3.2-1.685,4.992c-0.107,0.64,0.085,1.237,0.064,1.856c-0.021,0.427-0.299,0.811-0.299,1.237V448c0,10.176,7.189,18.923,17.152,20.907l213.333,42.667c1.387,0.299,2.795,0.427,4.181,0.427c4.885,0,9.685-1.685,13.525-4.843c4.928-4.053,7.808-10.091,7.808-16.491v-21.333H362.68c11.797,0,21.333-9.557,21.333-21.333V320C384.013,308.224,374.477,298.667,362.68,298.667z"/><p>Logout</p></svg></center>
+				</center>
+				<div id="tree">
+					<div id="files"></div>
+				</div>
+				<div id="favWrap">
+					<div id="favorites"></div>
+				</div>
+			</div>
+		</div>
+		<div id="content">
+			<div class="loader" id="bodyLoad"></div>
+		</div>
+		<div id="menu"></div>
+		<div id="chat">
+			<svg onclick="toggleChat()" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 47.971 47.971" ><path d="M28.228,23.986L47.092,5.122c1.172-1.171,1.172-3.071,0-4.242c-1.172-1.172-3.07-1.172-4.242,0L23.986,19.744L5.121,0.88c-1.172-1.172-3.07-1.172-4.242,0c-1.172,1.171-1.172,3.071,0,4.242l18.865,18.864L0.879,42.85c-1.172,1.171-1.172,3.071,0,4.242C1.465,47.677,2.233,47.97,3,47.97s1.535-0.293,2.121-0.879l18.865-18.864L42.85,47.091c0.586,0.586,1.354,0.879,2.121,0.879s1.535-0.293,2.121-0.879c1.172-1.171,1.172-3.071,0-4.242L28.228,23.986z"/></svg>
+			<div id="messages" class="hidescrollbar">
+				<center>No Messages</center>
+			</div>
+			<textarea id="chatInput" rows="1" onkeyup="if(event.keyCode == 13) {sendChat(this);}" oninput="fitText(this);" placeholder="Message"></textarea>
+		</div>
+	</div>
+	<div id="shade" onclick="closePopup()">
+		<div id="popup" onclick="event.stopPropagation();">
+			<h1 id="popup_head"></h1>
+			<div id="popup_msg"></div>
+			<div id="popup_buttons"></div>
+		</div>
+	</div>
+	<div id="pref">
+		<center class="ptab" id="ptabHlp">
+			<svg onclick="togglePref()" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 47.971 47.971" ><path d="M28.228,23.986L47.092,5.122c1.172-1.171,1.172-3.071,0-4.242c-1.172-1.172-3.07-1.172-4.242,0L23.986,19.744L5.121,0.88c-1.172-1.172-3.07-1.172-4.242,0c-1.172,1.171-1.172,3.071,0,4.242l18.865,18.864L0.879,42.85c-1.172,1.171-1.172,3.071,0,4.242C1.465,47.677,2.233,47.97,3,47.97s1.535-0.293,2.121-0.879l18.865-18.864L42.85,47.091c0.586,0.586,1.354,0.879,2.121,0.879s1.535-0.293,2.121-0.879c1.172-1.171,1.172-3.071,0-4.242L28.228,23.986z"/></svg>
+			<h1>Help</h1>
+			<h2>Slice Commands</h2>
+			<table>
+				<thead><tr><th>Windows/Linux</th><th>Mac</th><th>Action</th></tr></thead>
+				<tbody>
+					<tr><td>Right Click</td><td>Right Click</td><td>File Actions</td></tr>
+					<tr><td>Click + Drag</td><td>Click + Drag</td><td>Move Files</td></tr>
+					<tr><td>Shift + Click</td><td>Shift + Click</td><td>Select Range</td></tr>
+					<tr><td>Alt + Click</td><td>Opt + Click</td><td>Favorite</td></tr>
+					<tr><td>Click + Hold</td><td>Click + Hold</td><td>Open Folder as Root</td></tr>
+					<tr><td>Ctrl + S</td><td>Cmd + S</td><td>Save</td></tr>
+					<tr><td>Ctrl + O</td><td>Cmd + O</td><td>Upload File</td></tr>
+					<tr><td>Ctrl + F</td><td>Cmd + F</td><td>Search Files</td></tr>
+					<tr><td>Ctrl + F (in editor)</td><td>Cmd + F (in editor)</td><td>Search File</td></tr>
+					<tr><td>Alt + T</td><td>Opt + T</td><td>Toggle Chat</td></tr>
+					<tr><td>Alt + C</td><td>Opt + C</td><td>Toggle Color Picker</td></tr>
+					<tr><td>Alt + F</td><td>Opt + F</td><td>Toggle Favorited Files</td></tr>
+					<tr><td>Alt + ,</td><td>Opt + ,</td><td>Settings</td></tr>
+					<tr><td>Alt + H</td><td>Opt + H</td><td>Help Page</td></tr>
+					<tr><td>Alt + A</td><td>Opt + A</td><td>Account</td></tr>
+					<tr><td>Alt + N</td><td>Opt + N</td><td>New File</td></tr>
+					<tr><td>Esc</td><td>Esc</td><td>Open Menu / Close</td></tr>
+					<tr><td>Ctrl + 0</td><td>Cmd + 0</td><td>Close All Folders</td></tr>
+					<tr><td>Ctrl + +</td><td>Cmd + +</td><td>Increace Font Size</td></tr>
+					<tr><td>Ctrl + -</td><td>Cmd + -</td><td>Decreace Font Size</td></tr>
+				</tbody>
+			</table>
+      <h2>Line Operations</h2>
+      <table class="help_table">
+        <thead><tr><th>Windows/Linux</th><th>Mac</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td>Ctrl-D</td><td>Command-D</td><td>Remove line</td></tr>
+          <tr><td>Alt-Shift-Down</td><td>Command-Option-Down</td><td>Copy lines down</td></tr>
+          <tr><td>Alt-Shift-Up</td><td>Command-Option-Up</td><td>Copy lines up</td></tr>
+          <tr><td>Alt-Down</td><td>Option-Down</td><td>Move lines down</td></tr>
+          <tr><td>Alt-Up</td><td>Option-Up</td><td>Move lines up</td></tr>
+          <tr><td>Alt-Delete</td><td>Ctrl-K</td><td>Remove to line end</td></tr>
+          <tr><td>Alt-Backspace</td><td>Command-Backspace</td><td>Remove to linestart</td></tr>
+          <tr><td>Ctrl-Backspace</td><td>Option-Backspace, Ctrl-Option-Backspace</td><td>Remove word left</td></tr>
+          <tr><td>Ctrl-Delete</td><td>Option-Delete</td><td>Remove word right</td></tr>
+          <tr><td>---</td><td>Ctrl-O</td><td>Split line</td></tr>
+        </tbody>
+      </table>
+      <h2>Selection</h2>
+      <table class="help_table">
+        <thead><tr><th>Windows/Linux</th><th>Mac</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td>Ctrl-A</td><td>Command-A</td><td>Select all</td></tr>
+          <tr><td>Shift-Left</td><td>Shift-Left</td><td>Select left</td></tr>
+          <tr><td>Shift-Right</td><td>Shift-Right</td><td>Select right</td></tr>
+          <tr><td>Ctrl-Shift-Left</td><td>Option-Shift-Left</td><td>Select word left</td></tr>
+          <tr><td>Ctrl-Shift-Right</td><td>Option-Shift-Right</td><td>Select word right</td></tr>
+          <tr><td>Shift-Home</td><td>Shift-Home</td><td>Select line start</td></tr>
+          <tr><td>Shift-End</td><td>Shift-End</td><td>Select line end</td></tr>
+          <tr><td>Alt-Shift-Right</td><td>Command-Shift-Right</td><td>Select to line end</td></tr>
+          <tr><td>Alt-Shift-Left</td><td>Command-Shift-Left</td><td>Select to line start</td></tr>
+          <tr><td>Shift-Up</td><td>Shift-Up</td><td>Select up</td></tr>
+          <tr><td>Shift-Down</td><td>Shift-Down</td><td>Select down</td></tr>
+          <tr><td>Shift-PageUp</td><td>Shift-PageUp</td><td>Select page up</td></tr>
+          <tr><td>Shift-PageDown</td><td>Shift-PageDown</td><td>Select page down</td></tr>
+          <tr><td>Shift-PageDown</td><td>Shift-PageDown</td><td>Select page down</td></tr>
+          <tr><td>Ctrl-Shift-Home</td><td>Command-Shift-Up</td><td>Select to start</td></tr>
+          <tr><td>Ctrl-Shift-End</td><td>Command-Shift-Down</td><td>Select to end</td></tr>
+          <tr><td>Ctrl-Shift-D</td><td>Command-Shift-D</td><td>Duplicate selection</td></tr>
+          <tr><td>Ctrl-Shift-P</td><td>---</td><td>Select to matching bracket</td></tr>
+        </tbody>
+      </table>
+      <h2>Multicursor</h2>
+      <table class="help_table">
+        <thead><tr><th>Windows/Linux</th><th>Mac</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td>Ctrl-Alt-Up</td><td>Ctrl-Option-Up</td><td>Add multi-cursor above</td></tr>
+          <tr><td>Ctrl-Alt-Down</td><td>Ctrl-Option-Down</td><td>Add multi-cursor below</td></tr>
+          <tr><td>Ctrl-Alt-Right</td><td>Ctrl-Option-Right</td><td>Add next occurrence to multi-selection</td></tr>
+          <tr><td>Ctrl-Alt-Left</td><td>Ctrl-Option-Left</td><td>Add previous occurrence to multi-selection</td></tr>
+          <tr><td>Ctrl-Alt-Shift-Up</td><td>Ctrl-Option-Shift-Up</td><td>Move multicursor from current line to the line above</td></tr>
+          <tr><td>Ctrl-Alt-Shift-Down</td><td>Ctrl-Option-Shift-Down</td><td>Move multicursor from current line to the line below</td></tr>
+          <tr><td>Ctrl-Alt-Shift-Right</td><td>Ctrl-Option-Shift-Right</td><td>Remove current occurrence from multi-selection and move to next</td></tr>
+          <tr><td>Ctrl-Alt-Shift-Left</td><td>Ctrl-Option-Shift-Left</td><td>Remove current occurrence from multi-selection and move to previous</td></tr>
+          <tr><td>Ctrl-Shift-L</td><td>Ctrl-Shift-L</td><td>Select all from multi-selection</td></tr>
+        </tbody>
+      </table>
+      <h2>Go to</h2>
+      <table class="help_table">
+        <thead><tr><th>Windows/Linux</th><th>Mac</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td>Left</td><td>Left, Ctrl-B</td><td>Go to left</td></tr>
+          <tr><td>Right</td><td>Right, Ctrl-F</td><td>Go to right</td></tr>
+          <tr><td>Ctrl-Left</td><td>Option-Left</td><td>Go to word left</td></tr>
+          <tr><td>Ctrl-Right</td><td>Option-Right</td><td>Go to word right</td></tr>
+          <tr><td>Up</td><td>Up, Ctrl-P</td><td>Go line up</td></tr>
+          <tr><td>Down</td><td>Down, Ctrl-N</td><td>Go line down</td></tr>
+          <tr><td>Alt-Left, Home</td><td>Command-Left, Home, Ctrl-A</td><td>Go to line start</td></tr>
+          <tr><td>Alt-Right, End</td><td>Command-Right, End, Ctrl-E</td><td>Go to line end</td></tr>
+          <tr><td>PageUp</td><td>Option-PageUp</td><td>Go to page up</td></tr>
+          <tr><td>PageDown</td><td>Option-PageDown, Ctrl-V</td><td>Go to page down</td></tr>
+          <tr><td>Ctrl-Home</td><td>Command-Home, Command-Up</td><td>Go to start</td></tr>
+          <tr><td>Ctrl-End</td><td>Command-End, Command-Down</td><td>Go to end</td></tr>
+          <tr><td>Ctrl-L</td><td>Command-L</td><td>Go to line</td></tr>
+          <tr><td>Ctrl-Down</td><td>Command-Down</td><td>Scroll line down</td></tr>
+          <tr><td>Ctrl-Up</td><td>---</td><td>Scroll line up</td></tr>
+          <tr><td>Ctrl-P</td><td>---</td><td>Go to matching bracket</td></tr>
+          <tr><td>---</td><td>Option-PageDown</td><td>Scroll page down</td></tr>
+          <tr><td>---</td><td>Option-PageUp</td><td>Scroll page up</td></tr>
+        </tbody>
+      </table>
+      <h2>Find/Replace</h2>
+      <table class="help_table">
+        <thead><tr><th>Windows/Linux</th><th>Mac</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td>Ctrl-F</td><td>Command-F</td><td>Find</td></tr>
+          <tr><td>Ctrl-H</td><td>Command-Option-F</td><td>Replace</td></tr>
+          <tr><td>Ctrl-K</td><td>Command-G</td><td>Find next</td></tr>
+          <tr><td>Ctrl-Shift-K</td><td>Command-Shift-G</td><td>Find previous</td></tr>
+        </tbody>
+      </table>
+      <h2>Folding</h2>
+      <table class="help_table">
+        <thead><tr><th>Windows/Linux</th><th>Mac</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td>Alt-L, Ctrl-F1</td><td>Command-Option-L, Command-F1</td><td>Fold selection</td></tr>
+          <tr><td>Alt-Shift-L, Ctrl-Shift-F1</td><td>Command-Option-Shift-L, Command-Shift-F1</td><td>Unfold</td></tr>
+          <tr><td>Alt-0</td><td>Command-Option-0</td><td>Fold all</td></tr>
+          <tr><td>Alt-Shift-0</td><td>Command-Option-Shift-0</td><td>Unfold all</td></tr>
+        </tbody>
+      </table>
+      <h2>Other</h2>
+      <table class="help_table">
+        <thead><tr><th>Windows/Linux</th><th>Mac</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td>Tab</td><td>Tab</td><td>Indent</td></tr>
+          <tr><td>Shift-Tab</td><td>Shift-Tab</td><td>Outdent</td></tr>
+          <tr><td>Ctrl-Z</td><td>Command-Z</td><td>Undo</td></tr>
+          <tr><td>Ctrl-Shift-Z, Ctrl-Y</td><td>Command-Shift-Z, Command-Y	</td><td>Redo</td></tr>
+          <tr><td>Ctrl-/</td><td>Command-/</td><td>Toggle comment</td></tr>
+          <tr><td>Ctrl-T</td><td>Ctrl-T</td><td>Transpose letters</td></tr>
+          <tr><td>Ctrl-Enter</td><td>Command-Enter</td><td>Enter full screen</td></tr>
+          <tr><td>Ctrl-Shift-U</td><td>Ctrl-Shift-U</td><td>Change to lower case</td></tr>
+          <tr><td>Ctrl-U</td><td>Ctrl-U</td><td>Change to upper case</td></tr>
+          <tr><td>Insert</td><td>Insert</td><td>Overwrite</td></tr>
+          <tr><td>Ctrl-Shift-E</td><td>Command-Shift-E</td><td>Macros replay</td></tr>
+          <tr><td>Ctrl-Alt-E</td><td>---</td><td>Macros recording</td></tr>
+          <tr><td>Delete</td><td>---</td><td>Delete</td></tr>
+          <tr><td>---</td><td>Ctrl-L</td><td>Center selection</td></tr>
+        </tbody>
+      </table>
+			<br><br><br><br>
+		</center>
+		<div class="ptab" id="ptabSet">
+			<svg onclick="togglePref()" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 47.971 47.971" ><path d="M28.228,23.986L47.092,5.122c1.172-1.171,1.172-3.071,0-4.242c-1.172-1.172-3.07-1.172-4.242,0L23.986,19.744L5.121,0.88   c-1.172-1.172-3.07-1.172-4.242,0c-1.172,1.171-1.172,3.071,0,4.242l18.865,18.864L0.879,42.85c-1.172,1.171-1.172,3.071,0,4.242   C1.465,47.677,2.233,47.97,3,47.97s1.535-0.293,2.121-0.879l18.865-18.864L42.85,47.091c0.586,0.586,1.354,0.879,2.121,0.879   s1.535-0.293,2.121-0.879c1.172-1.171,1.172-3.071,0-4.242L28.228,23.986z"/></svg>
+			<h1>Settings</h1>
+			<br><br>
+			<div class="pref">
+				<label for="s_theme">Theme</label>
+				<dropdown>
+					<input id="s_theme" type="text" spellcheck="false" />
+					<label for="s_theme"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 36.678 36.678"><path d="M29.696,20.076c0.088,0.16,0.08,0.354-0.021,0.51L19.395,36.449c-0.091,0.139-0.241,0.224-0.407,0.229c-0.004,0-0.008,0-0.015,0c-0.157,0-0.31-0.076-0.403-0.205L6.998,20.609c-0.11-0.15-0.127-0.354-0.041-0.521c0.085-0.168,0.257-0.272,0.444-0.272h21.855C29.443,19.814,29.609,19.914,29.696,20.076z M7.401,16.865h21.855c0.008,0,0.017,0,0.021,0c0.275,0,0.5-0.225,0.5-0.5c0-0.156-0.07-0.295-0.184-0.388L18.086,0.205C17.989,0.072,17.821,0.002,17.668,0c-0.165,0.005-0.315,0.09-0.406,0.229L6.982,16.094c-0.101,0.152-0.105,0.35-0.021,0.512C7.05,16.765,7.218,16.865,7.401,16.865z"/></svg></label>
+					<items></items>
+				</dropdown>
+			</div>
+			<div class="pref">
+				<label for="s_uiFont">UI Font</label>
+				<dropdown>
+					<input id="s_uiFont" type="text" spellcheck="false" />
+					<label for="s_uiFont"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 36.678 36.678"><path d="M29.696,20.076c0.088,0.16,0.08,0.354-0.021,0.51L19.395,36.449c-0.091,0.139-0.241,0.224-0.407,0.229c-0.004,0-0.008,0-0.015,0c-0.157,0-0.31-0.076-0.403-0.205L6.998,20.609c-0.11-0.15-0.127-0.354-0.041-0.521c0.085-0.168,0.257-0.272,0.444-0.272h21.855C29.443,19.814,29.609,19.914,29.696,20.076z M7.401,16.865h21.855c0.008,0,0.017,0,0.021,0c0.275,0,0.5-0.225,0.5-0.5c0-0.156-0.07-0.295-0.184-0.388L18.086,0.205C17.989,0.072,17.821,0.002,17.668,0c-0.165,0.005-0.315,0.09-0.406,0.229L6.982,16.094c-0.101,0.152-0.105,0.35-0.021,0.512C7.05,16.765,7.218,16.865,7.401,16.865z"/></svg></label>
+					<items>
+						<item>Source Sans Pro</item>
+						<item>Apple</item>
+						<item>Roboto</item>
+						<item>Open Sans</item>
+					</items>
+				</dropdown>
+			</div>
+			<div class="pref">
+				<label for="p_fontFamily">Editor Font</label>
+				<dropdown>
+					<input id="p_fontFamily" type="text" spellcheck="false" />
+					<label for="p_fontFamily"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 36.678 36.678"><path d="M29.696,20.076c0.088,0.16,0.08,0.354-0.021,0.51L19.395,36.449c-0.091,0.139-0.241,0.224-0.407,0.229c-0.004,0-0.008,0-0.015,0c-0.157,0-0.31-0.076-0.403-0.205L6.998,20.609c-0.11-0.15-0.127-0.354-0.041-0.521c0.085-0.168,0.257-0.272,0.444-0.272h21.855C29.443,19.814,29.609,19.914,29.696,20.076z M7.401,16.865h21.855c0.008,0,0.017,0,0.021,0c0.275,0,0.5-0.225,0.5-0.5c0-0.156-0.07-0.295-0.184-0.388L18.086,0.205C17.989,0.072,17.821,0.002,17.668,0c-0.165,0.005-0.315,0.09-0.406,0.229L6.982,16.094c-0.101,0.152-0.105,0.35-0.021,0.512C7.05,16.765,7.218,16.865,7.401,16.865z"/></svg></label>
+					<items>
+						<item>Inconsolata</item>
+						<item>Source Code Pro</item>
+						<item>Roboto Mono</item>
+						<item>Monospace</item>
+					</items>
+				</dropdown>
+			</div>
+			<div class="pref">
+				<label for="p_fontSize">Font Size</label>
+				<input id="p_fontSize" type="number" value="15" min="5" max="60" onblur="if(parseFloat(this.value) > 60){this.value = 60;}if(parseFloat(this.value) < 5){this.value = 5;}setOpt(this);" />px
+			</div>
+			<div class="pref">
+				<label for="s_lineHeight">Line Height</label>
+				<dropdown>
+					<input id="s_lineHeight" type="text" spellcheck="false" />
+					<label for="s_lineHeight"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 36.678 36.678"><path d="M29.696,20.076c0.088,0.16,0.08,0.354-0.021,0.51L19.395,36.449c-0.091,0.139-0.241,0.224-0.407,0.229c-0.004,0-0.008,0-0.015,0c-0.157,0-0.31-0.076-0.403-0.205L6.998,20.609c-0.11-0.15-0.127-0.354-0.041-0.521c0.085-0.168,0.257-0.272,0.444-0.272h21.855C29.443,19.814,29.609,19.914,29.696,20.076z M7.401,16.865h21.855c0.008,0,0.017,0,0.021,0c0.275,0,0.5-0.225,0.5-0.5c0-0.156-0.07-0.295-0.184-0.388L18.086,0.205C17.989,0.072,17.821,0.002,17.668,0c-0.165,0.005-0.315,0.09-0.406,0.229L6.982,16.094c-0.101,0.152-0.105,0.35-0.021,0.512C7.05,16.765,7.218,16.865,7.401,16.865z"/></svg></label>
+					<items>
+						<item>1em</item>
+						<item>1.1em</item>
+						<item>1.2em</item>
+						<item>1.3em</item>
+						<item>1.4em</item>
+						<item>1.5em</item>
+						<item>1.6em</item>
+						<item>1.7em</item>
+						<item>1.8em</item>
+						<item>1.9em</item>
+						<item>2em</item>
+					</items>
+				</dropdown>
+			</div>
+			<div class="pref">
+				<label for="p_tabSize">Tab Size</label>
+				<dropdown>
+					<input id="p_tabSize" type="text" spellcheck="false" />
+					<label for="p_tabSize"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 36.678 36.678"><path d="M29.696,20.076c0.088,0.16,0.08,0.354-0.021,0.51L19.395,36.449c-0.091,0.139-0.241,0.224-0.407,0.229c-0.004,0-0.008,0-0.015,0c-0.157,0-0.31-0.076-0.403-0.205L6.998,20.609c-0.11-0.15-0.127-0.354-0.041-0.521c0.085-0.168,0.257-0.272,0.444-0.272h21.855C29.443,19.814,29.609,19.914,29.696,20.076z M7.401,16.865h21.855c0.008,0,0.017,0,0.021,0c0.275,0,0.5-0.225,0.5-0.5c0-0.156-0.07-0.295-0.184-0.388L18.086,0.205C17.989,0.072,17.821,0.002,17.668,0c-0.165,0.005-0.315,0.09-0.406,0.229L6.982,16.094c-0.101,0.152-0.105,0.35-0.021,0.512C7.05,16.765,7.218,16.865,7.401,16.865z"/></svg></label>
+					<items>
+						<item>1</item>
+						<item>2</item>
+						<item>3</item>
+						<item>4</item>
+						<item>5</item>
+						<item>6</item>
+						<item>7</item>
+						<item>8</item>
+					</items>
+				</dropdown>
+			</div>
+			<div class="pref">
+				<input type="checkbox" id="p_wrap" oninput="setOpt(this);">
+				<label for="p_wrap">Wrap</label>
+			</div>
+			<div class="pref">
+				<input type="checkbox" id="p_scrollPastEnd" oninput="setOpt(this);">
+				<label for="p_scrollPastEnd">Scroll Past End</label>
+			</div>
+			<div class="pref">
+				<input type="checkbox" id="p_showInvisibles" oninput="setOpt(this);">
+				<label for="p_showInvisibles">Show Invisibles</label>
+			</div>
+			<div class="pref">
+				<input type="checkbox" id="p_displayIndentGuides" oninput="setOpt(this);">
+				<label for="p_displayIndentGuides">Show Indent Guidelines</label>
+			</div>
+			<div class="pref">
+				<input type="checkbox" id="p_useSoftTabs" oninput="setOpt(this);">
+				<label for="p_useSoftTabs">Soft Tabs</label>
+			</div>
+			<div class="pref">
+				<input type="checkbox" id="p_showPrintMargin" oninput="setOpt(this);">
+				<label for="p_showPrintMargin">Show Print Margin</label>
+			</div>
+			<div class="pref">
+				<input type="checkbox" id="p_enableEmmet" oninput="setOpt(this);">
+				<label for="p_enableEmmet">Enable Emmet Shortcuts</label>
+			</div>
+			<div class="pref">
+				<input type="checkbox" id="s_chatSound" oninput="setOpt(this);">
+				<label for="s_chatSound">Chat Ding</label>
+			</div>
+			<div class="pref">
+				<input type="checkbox" id="s_chatNotification" oninput="setOpt(this);">
+				<label for="s_chatNotification">Chat Notifications</label>
+			</div>
+			<div class="pref">
+				<div class="btn" onclick="tree.setRoot('/');togglePref();">Reset Root Directory</div>
+			</div>
+		</div>
+	</div>
+	<div id="colorpicker" oncontextmenu="return false;">
+		<svg onclick="togglePicker()" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 47.971 47.971" ><path d="M28.228,23.986L47.092,5.122c1.172-1.171,1.172-3.071,0-4.242c-1.172-1.172-3.07-1.172-4.242,0L23.986,19.744L5.121,0.88   c-1.172-1.172-3.07-1.172-4.242,0c-1.172,1.171-1.172,3.071,0,4.242l18.865,18.864L0.879,42.85c-1.172,1.171-1.172,3.071,0,4.242   C1.465,47.677,2.233,47.97,3,47.97s1.535-0.293,2.121-0.879l18.865-18.864L42.85,47.091c0.586,0.586,1.354,0.879,2.121,0.879   s1.535-0.293,2.121-0.879c1.172-1.171,1.172-3.071,0-4.242L28.228,23.986z"/></svg>
+		<div id="colorDrag"></div>
+    <div id="sliders">
+      <div id="colorwrap" onmousedown="dragColor=this.children[0];selectColor(this.children[0]);">
+        <canvas id="colorscape" data-marker="shadeMarker"></canvas>
+        <div id="shadeMarker" class="colorMarker"></div>
+      </div>
+      <div id="huewrap" onmousedown="dragColor=this.children[0];selectColor(this.children[0]);">
+        <canvas id="huescape" data-marker="hueMarker"></canvas>
+        <div id="hueMarker" class="colorMarker"></div>
+      </div>
+      <div id="alphawrap" onmousedown="dragColor=this.children[0];selectColor(this.children[0]);">
+        <canvas id="alphascape" data-marker="alphaMarker"></canvas>
+        <div id="alphaMarker" class="colorMarker"></div>
+      </div>
+    </div>
+	  <div id="colorInfo">
+      <label id="colorPreview" for="colorinput"></label>
+			<dropdown id="colorTypeDropdown">
+				<input id="colorType" type="text" value="HEX" spellcheck="false"/>
+				<label for="colorType"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 36.678 36.678"><path d="M29.696,20.076c0.088,0.16,0.08,0.354-0.021,0.51L19.395,36.449c-0.091,0.139-0.241,0.224-0.407,0.229c-0.004,0-0.008,0-0.015,0c-0.157,0-0.31-0.076-0.403-0.205L6.998,20.609c-0.11-0.15-0.127-0.354-0.041-0.521c0.085-0.168,0.257-0.272,0.444-0.272h21.855C29.443,19.814,29.609,19.914,29.696,20.076z M7.401,16.865h21.855c0.008,0,0.017,0,0.021,0c0.275,0,0.5-0.225,0.5-0.5c0-0.156-0.07-0.295-0.184-0.388L18.086,0.205C17.989,0.072,17.821,0.002,17.668,0c-0.165,0.005-0.315,0.09-0.406,0.229L6.982,16.094c-0.101,0.152-0.105,0.35-0.021,0.512C7.05,16.765,7.218,16.865,7.401,16.865z"/></svg></label>
+				<items>
+					<item class="selected" onmousedown="setColorType(this)">HEX</item>
+					<item onmousedown="setColorType(this)">RGB</item>
+					<item onmousedown="setColorType(this)">HSL</item>
+				</items>
+			</dropdown>
+      <div id="colorValueWrap">
+        <input id="colorValue" onkeydown="if(event.keyCode === 13){inputColor(this.value);}" value="#000000" placeholder="Color" spellcheck="false"/>
+        <svg id="addSwatch" onclick="addSwatch(color);" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100" xml:space="preserve" fill="#000000" stroke="#000000"><line x1="50" y1="10" x2="50" y2="90" stroke-width="20" stroke-linecap="square"></line><line x1="10" y1="50" x2="90" y2="50" stroke-width="20" stroke-linecap="square"></line></svg>
+	    </div>
+	  </div>
+	  <div id="swatches">
+	      
+	  </div>
+  </div>
+  <div id="frames">
+		<svg onclick="toggleFrame();" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 47.971 47.971" ><path d="M28.228,23.986L47.092,5.122c1.172-1.171,1.172-3.071,0-4.242c-1.172-1.172-3.07-1.172-4.242,0L23.986,19.744L5.121,0.88   c-1.172-1.172-3.07-1.172-4.242,0c-1.172,1.171-1.172,3.071,0,4.242l18.865,18.864L0.879,42.85c-1.172,1.171-1.172,3.071,0,4.242   C1.465,47.677,2.233,47.97,3,47.97s1.535-0.293,2.121-0.879l18.865-18.864L42.85,47.091c0.586,0.586,1.354,0.879,2.121,0.879   s1.535-0.293,2.121-0.879c1.172-1.171,1.172-3.071,0-4.242L28.228,23.986z"/></svg>
+  </div>
+	<form id="uploadForm" class="hidden" enctype="multipart/form-data" name="uploadForm" action="/upload" method="post">
+		<input id="upload" name="upload" type="file" multiple onchange="File.upload(new FormData(this.parentNode));this.parentNode.blur();"/>
+	</form>
+	<style id="font_p_fontFamily"></style>
+	<style id="font_s_uiFont"></style>
+
+	<script src="lib/ot.js"></script>
+	<script src="lib/fuzzysearch.js"></script>
+	<script src="lib/tinycolor.js"></script>
+	<script src="lib/ace/ace.js"></script>
+	<script src="lib/ace/ext-modelist.js"></script>
+	<script src="lib/ace/ext-emmet.js"></script>
+	<script src="../socket.io/socket.io.js"></script>
+	<script src="User.js"></script>
+	<script src="Tree.js"></script>
+	<script src="Menu.js"></script>
+	<script src="Editor.js"></script>
+	<script src="Panel.js"></script>
+	<script src="File.js"></script>
+	<script src="Media.js"></script>
+	<script src="Cursor.js"></script>
+	<script src="Selection.js"></script>
+	<script src="ui.js"></script>
+	<script src="main.js"></script>
+</body>
+</html>
