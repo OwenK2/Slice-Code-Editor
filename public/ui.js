@@ -83,7 +83,7 @@ function notification(content,isHtml) { //CREATES A NOTIFCATION
 	setTimeout(function() {closeNotification(n);}, 5000);
 }
 function closeNotification(elem) {
-	if(!elem) {return;}
+	if(!elem  || notifs.indexOf(elem) === -1) {return;}
 	notifHeight -= (elem.offsetHeight+10);
 	elem.style.right = -(elem.offsetWidth+10)+"px";
 	notifs.splice(notifs.indexOf(elem),1);
