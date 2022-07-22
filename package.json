@@ -18,7 +18,7 @@
     "express": "^4.16.4",
     "express-fileupload": "^1.1.9",
     "express-session": "^1.15.6",
-    "file-type": "^10.8.0",
+    "file-type": "^16.5.4",
     "mime-types": "^2.1.22",
     "mysql": "^2.16.0",
     "ot": "0.0.15",
